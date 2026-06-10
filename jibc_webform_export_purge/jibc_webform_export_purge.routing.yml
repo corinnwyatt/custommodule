@@ -1,0 +1,17 @@
+jibc_webform_export_purge.settings:
+  path: '/admin/config/jibc-webform-export-purge'
+  defaults:
+    _form: '\Drupal\jibc_webform_export_purge\Form\SettingsForm'
+    _title: 'JIBC Webform Export & Purge Settings'
+  requirements:
+    _permission: 'administer site configuration'
+
+jibc_webform_export_purge.manual_export:
+  path: '/admin/config/jibc-webform-export-purge/run'
+  defaults:
+    _controller: '\Drupal\jibc_webform_export_purge\Controller\ManualExportController::run'
+    _title: 'Manual Export Run'
+  requirements:
+    _permission: 'administer site configuration'
+  options:
+    _csrf_token: 'TRUE'
