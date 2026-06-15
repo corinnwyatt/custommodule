@@ -1,0 +1,83 @@
+<?php
+
+/**
+ * @file
+ * JIBC Webform Export & Purge module.
+ *
+ * Exports webform submissions as CSV email attachments on a weekly cron
+ * schedule, then purges the exported submissions.
+ *
+ * Compatible with Drupal 10.6+ and Drupal 11.
+ * Compatible with SMTP module, SendGrid module, or any mail system
+ * that supports the standard $message['params']['attachments'] format.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function jibc_webform_export_purge_help($route_name, RouteMatchInterface $route_match) {
+  if ($route_name === 'help.page.jibc_webform_export_purge') {
+    return '<p>' . t('Exports webform submissions as a CSV email attachment on a scheduled basis and purges them after successful delivery.') . '</p>';
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function jibc_webform_export_purge_cron() {
+  $config = \Drupal::config('jibc_webform_export_purge.settings');
+
+  // Bail out if not enabled.
+  if (!$config->get('enabled')) {
+    return;
+  }
+
+  $export_day = $config->get('export_day') ?: 'monday';
+  $last_export = $config->get('last_export') ?: 0;
+
+  // Check: is it the right day of the week?
+  $today = strtolower(date('l'));
+  if ($today !== strtolower($export_day)) {
+    return;
+  }
+
+  // Check: have we already exported today? Prevent double runs.
+  // If last export was within 20 hours, skip.
+  if ($last_export > 0 && (\Drupal::time()->getRequestTime() - $last_export) < 72000) {
+    return;
+  }
+
+  $email_to = $config->get('email_to');
+  $webform_ids = $config->get('webform_ids') ?: [];
+
+  if (empty($email_to) || empty($webform_ids)) {
+    \Drupal::logger('jibc_webform_export_purge')->warning('Export skipped: email address or webform IDs not configured.');
+    return;
+  }
+
+  /** @var \Drupal\jibc_webform_export_purge\WebformExportService $service */
+  $service = \Drupal::service('jibc_webform_export_purge.export_service');
+  $service->exportAndPurge($webform_ids, $email_to);
+}
+
+/**
+ * Implements hook_mail().
+ *
+ * Sets up the email message. Attachments are passed through in
+ * $message['params']['attachments'] which is the standard format
+ * supported by SMTP module, SendGrid module, and other mail systems.
+ */
+function jibc_webform_export_purge_mail($key, &$message, $params) {
+  if ($key === 'weekly_export') {
+    $message['subject'] = $params['subject'];
+    $message['body'][] = $params['body'];
+
+    // Pass attachments through. The active mail system plugin (SMTP,
+    // SendGrid, etc.) will handle encoding them into the email.
+    if (!empty($params['attachments'])) {
+      $message['params']['attachments'] = $params['attachments'];
+    }
+  }
+}
