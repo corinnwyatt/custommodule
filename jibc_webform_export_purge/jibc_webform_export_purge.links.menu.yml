@@ -1,6 +1,0 @@
-jibc_webform_export_purge.settings:
-  title: 'JIBC Webform Export & Purge'
-  description: 'Configure email, webforms, and export schedule for weekly submission exports.'
-  route_name: jibc_webform_export_purge.settings
-  parent: system.admin_config_system
-  weight: 50
