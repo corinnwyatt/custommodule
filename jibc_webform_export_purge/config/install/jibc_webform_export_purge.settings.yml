@@ -1,7 +1,0 @@
-email_to: ''
-email_subject: 'Weekly Webform Submissions Export'
-email_body: 'Attached is the weekly export of webform submissions. This export was generated automatically.'
-webform_ids: []
-export_day: 'monday'
-last_export: 0
-enabled: false
