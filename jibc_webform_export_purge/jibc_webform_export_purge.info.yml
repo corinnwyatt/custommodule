@@ -1,0 +1,8 @@
+name: 'JIBC Webform Export & Purge'
+type: module
+description: 'Exports webform submissions as a CSV email attachment on a weekly cron schedule, then purges them.'
+core_version_requirement: ^10.6 || ^11
+package: JIBC
+dependencies:
+  - drupal:webform
+configure: jibc_webform_export_purge.settings

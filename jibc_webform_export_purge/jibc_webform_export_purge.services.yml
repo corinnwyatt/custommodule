@@ -1,0 +1,11 @@
+services:
+  jibc_webform_export_purge.export_service:
+    class: Drupal\jibc_webform_export_purge\WebformExportService
+    arguments:
+      - '@entity_type.manager'
+      - '@plugin.manager.mail'
+      - '@logger.factory'
+      - '@config.factory'
+      - '@datetime.time'
+      - '@file_system'
+      - '@path_alias.manager'
